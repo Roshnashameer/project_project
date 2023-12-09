@@ -10,7 +10,7 @@ import { BASE_URL } from '../service/baseUrl';
 
 
 function Profile() {
-    const [update,setUpdate]=useState("")
+    const [update, setUpdate] = useState("")
 
     const [show, setShow] = useState(false);
     const [preview, setPreview] = useState("")
@@ -21,8 +21,9 @@ function Profile() {
     })
     useEffect(() => {
         const userData = (JSON.parse(localStorage.getItem("currentUser")))
-        setProfile({ ...profile, user: userData.userName, image: "", gitHub: userData.gitHub, linkedIn: userData.linkedIn })
+        if (userData) { setProfile({ ...profile, user: userData?.userName, image: "", gitHub: userData.gitHub, linkedIn: userData.linkedIn }) 
         setExistingImage(userData.profile)
+    }
     }, [update])
     useEffect(() => {
         if (profile.image) {
@@ -80,64 +81,65 @@ function Profile() {
 
     const handleUpdate = async (e) => {
         e.preventDefault()
-        try{
-        const { user, image, gitHub, linkedIn } = profile
+        try {
+            const { user, image, gitHub, linkedIn } = profile
 
 
-        // api call
-        // id
-        if (localStorage.getItem("currentId")) {
-            const id = localStorage.getItem("currentId")
-            console.log(`Id:${id}`);
+            // api call
+            // id
+            if (localStorage.getItem("currentId")) {
+                const id = localStorage.getItem("currentId")
+                console.log(`Id:${id}`);
 
-            // header
-            const reqHeader = {
-                "Content-Type": "multipart/form-data",
-                "access_token": `Bearer ${token}`
+                // header
+                const reqHeader = {
+                    "Content-Type": "multipart/form-data",
+                    "access_token": `Bearer ${token}`
+                }
+                // body
+                const reqBody = new FormData()
+                reqBody.append("userName", user)
+                reqBody.append("profile", image ? image : existingImage)
+                reqBody.append("gitHub", gitHub)
+                reqBody.append("linkedIn", linkedIn)
+                // console.log(reqBody);
+                const response = await updateProfile(reqBody, reqHeader, id)
+                console.log(response);
+                if (response.status == 200) {
+                    //  alert(`Updated Successfully`)
+                    toast.info(`Updated Successfully`, {
+                        position: "top-center",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+                    localStorage.setItem("currentUser", JSON.stringify(response.data))
+                    setUpdate(response.data)
+                    handleClose()
+                    // refresh profile  data
+                    // getProfile()
+                    // update new username in local storage
+                    // localStorage.setItem("currentUser", profile.user)
+
+                }
+                else {
+                    console.log("profile update fail");
+                    handleClose()
+                }
             }
-            // body
-            const reqBody = new FormData()
-            reqBody.append("userName", user)
-            reqBody.append("profile", image?image:existingImage)
-            reqBody.append("gitHub", gitHub)
-            reqBody.append("linkedIn", linkedIn)
-            // console.log(reqBody);
-            const response = await updateProfile(reqBody, reqHeader, id)
-            console.log(response);
-            if (response.status == 200) {
-                //  alert(`Updated Successfully`)
-                toast.info(`Updated Successfully`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
-                localStorage.setItem("currentUser",JSON.stringify(response.data))
-                setUpdate(response.data)
-                handleClose()
-                // refresh profile  data
-                // getProfile()
-                // update new username in local storage
-                // localStorage.setItem("currentUser", profile.user)
+        }
+        catch (error) {
+            console.error("Error updating profile:", error);
+            // Handle the error, show a user-friendly message, or log it appropriately.
 
-            }
-            else {
-                console.log("profile update fail");
-                handleClose()
-            }
-        }}
-     catch (error) {
-        console.error("Error updating profile:", error);
-        // Handle the error, show a user-friendly message, or log it appropriately.
-    
 
+        }
     }
-}
-    
+
     console.log(preview);
     return (
         <div>
@@ -154,16 +156,16 @@ function Profile() {
             <Row>
                 <div className='text-center'>
                     {
-                        existingImage !=""?
-                        <img className='w-50 mt-3 rounded-end-pill'
-                        src={`${BASE_URL}/uploads/${existingImage}`} alt=''/>
-                        :
-                        <img className='w-50 mt-3 rounded-end-pill' alt=''
-                        src={'https://i.postimg.cc/d0MNZ0RH/360-F-517798849-Wu-Xh-HTpg2dj-Tbf-Nf0-FQAjz-FEolu-Hpnct.jpg'}/>
+                        existingImage != "" ?
+                            <img className='w-50 mt-3 rounded-end-pill'
+                                src={`${BASE_URL}/uploads/${existingImage}`} alt='' />
+                            :
+                            <img className='w-50 mt-3 rounded-end-pill' alt=''
+                                src={'https://i.postimg.cc/d0MNZ0RH/360-F-517798849-Wu-Xh-HTpg2dj-Tbf-Nf0-FQAjz-FEolu-Hpnct.jpg'} />
 
 
                     }
-                   
+
                 </div>
                 <Container>
                     <hr className='text-primary' />
@@ -185,27 +187,27 @@ function Profile() {
                         </Modal.Header>
                         <Modal.Body>
                             <label htmlFor='img1' className='text-center'>
-                            {
-                        existingImage !=""?
-                        <img className='w-50 mt-3 rounded-end-pill'
-                        src={`${BASE_URL}/uploads/${existingImage}`} alt=''/>
-                        :
-                        <img className='w-50 mt-3 rounded-end-pill' alt=''
-                        src={'https://i.postimg.cc/d0MNZ0RH/360-F-517798849-Wu-Xh-HTpg2dj-Tbf-Nf0-FQAjz-FEolu-Hpnct.jpg'}/>
+                                {
+                                    existingImage != "" ?
+                                        <img className='w-50 mt-3 rounded-end-pill'
+                                            src={`${BASE_URL}/uploads/${existingImage}`} alt='' />
+                                        :
+                                        <img className='w-50 mt-3 rounded-end-pill' alt=''
+                                            src={'https://i.postimg.cc/d0MNZ0RH/360-F-517798849-Wu-Xh-HTpg2dj-Tbf-Nf0-FQAjz-FEolu-Hpnct.jpg'} />
 
 
-                    }
-                                
+                                }
+
                             </label>
 
-                                <input placeholder='choose file'
-                                    onChange={(e) => setProfile({ ...profile, ["image"]: e.target.files[0] })}
-                                    name='image'
-                                    id="img1"
-                                    style={{ display: 'none' }}
-                                    type='file'
-                                />
-                                
+                            <input placeholder='choose file'
+                                onChange={(e) => setProfile({ ...profile, ["image"]: e.target.files[0] })}
+                                name='image'
+                                id="img1"
+                                style={{ display: 'none' }}
+                                type='file'
+                            />
+
                             <div className='mt-5'>
                                 <input value={profile?.user} onChange={(e) => setData(e)} name='user' type='text' className='form-control' placeholder='Username' />
                             </div>

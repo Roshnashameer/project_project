@@ -3,15 +3,29 @@ import {  Col, Container, Row } from 'react-bootstrap'
 import './Home.css'
 import ProjectCard from '../components/ProjectCard'
 import { Link } from 'react-router-dom'
+import { homeProjectApi } from '../service/allApi'
 
 function Home() {
   const [isLoggedIn,setLoggedIn]=useState(false)
+  const [homeProjects,setHomeProjects]=useState([])
+
+  const getHomeProjects=async()=>{
+    try {
+    const response = await homeProjectApi();
+    setHomeProjects(response.data);
+  } catch (error) {
+    console.error('Error fetching home projects:', error);
+    // Handle error if needed
+  }
+  }
   useEffect(()=>{
+    getHomeProjects()
     if(localStorage.getItem("currentId")){
       setLoggedIn(true)
     }
   },[])
   // console.log(isLoggedIn);
+  // console.log(homeProjects);
   return (
     <div id="sec1">
         <Row className='pt-5 pb-5'>
@@ -47,9 +61,13 @@ function Home() {
               <Container>
                    <marquee scrollAmount={25}>
                         <div className='d-flex justify-content-between'>
-                            <div><ProjectCard></ProjectCard></div>
-                            <div><ProjectCard></ProjectCard></div>
-                            <div><ProjectCard></ProjectCard></div>
+                           { homeProjects.length>0?homeProjects.map(i=>( 
+                           <div><ProjectCard project={i}></ProjectCard></div>
+                           )):<h1>No Projects Uploaded yet!</h1>
+                          
+                            
+                           
+                            }
                             
                         </div>
                    </marquee>

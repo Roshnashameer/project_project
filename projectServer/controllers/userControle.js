@@ -72,7 +72,7 @@ exports.editProfile = async (req, res) => {
 exports.addProject=async(req,res)=>{
     const {title,languages,overView,gitHub,website}=req.body
     // image-from multer
-    const projectImage=req.file.filename
+    const projectImage=req.file?.filename
     // useId
     const userId=req.payload
     try{
@@ -97,7 +97,93 @@ exports.addProject=async(req,res)=>{
 }
 exports.getUserProjects=async(req,res)=>{
     const {id}=req.params
+    try{
+        const projectsArray=await projects.find({userId:id})
+        if (projectsArray && projectsArray.length > 0) {
+            res.status(200).json(projectsArray);
+        } else {
+            res.status(404).json("No projects uploaded yet");
+        }
 
+    }
+    catch(err) {
+        return res.status(401).json(`Project get API failed: ${err}`);
+    }
+
+}
+exports.getAllProjects=async(req,res)=>{
+    // query data
+    const searchQuery=req.query.search 
+    // regexp query
+    const query={
+        languages:{$regex:searchQuery,$options:"i"}//i=case-insensitive
+    }
+    
+    try{
+        const allProjectsArray=await projects.find(query)
+        if(allProjectsArray){
+            res.status(200).json(allProjectsArray)
+            
+        }
+        else{
+            res.status(404).json("No projects uploaded yet")
+        }
+
+    }
+    catch(err) {
+        return res.status(401).json(`Project get API failed: ${err}`);
+    }
+
+}
+exports.getHomeProjects=async(req,res)=>{
+    
+    
+    try{
+        const homeProjectsArray=await projects.find().limit(3)
+        if(homeProjectsArray){
+            res.status(200).json(homeProjectsArray)
+            
+        }
+        else{
+            res.status(404).json("No projects uploaded yet")
+        }
+
+    }
+    catch(err) {
+        return res.status(401).json(`Project get API failed: ${err}`);
+    }
+
+}
+exports.editProject=async(req,res)=>{
+    const {title,languages,overView,gitHub,website,projectImage}=req.body
+    const {_id}=req.params
+    // image-from multer
+    const uploadImage=req.file?req.file.filename:projectImage
+    try{
+        const updatedProject=await projects.findByIdAndUpdate({_id},{title,languages,gitHub,website,overView,
+        projectImage:uploadImage},{new:true})
+        await updatedProject.save()
+        res.status(200).json(updatedProject)
+
+    }
+    catch(err) {
+        return res.status(401).json(`Project edit API failed: ${err}`);
+    }
+
+
+}
+exports.deleteProject=async(req,res)=>{
+    const {_id}=req.params
+    try{
+       const response= await projects.deleteOne({_id})
+       if(response){
+        res.status(200).json("project deleted")
+       }
+
+    }
+    catch(err) {
+        return res.status(401).json(`Project Delete API failed: ${err}`);
+    }
 
 }
 

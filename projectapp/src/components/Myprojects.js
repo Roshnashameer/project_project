@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { addProjectApi } from '../service/allApi';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { addResponseContext } from '../service/ContextShare';
 function Myprojects() {
+    const  {addUpdate,setAddUpdate}=useContext(addResponseContext)
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -23,6 +26,9 @@ function Myprojects() {
     useEffect(()=>{
         if(projectInputs.projectImage){
             setPreview(URL.createObjectURL(projectInputs.projectImage))
+        }
+        else{
+            setPreview("")
         }
     },[projectInputs.projectImage])
     useEffect(()=>{
@@ -52,11 +58,35 @@ function Myprojects() {
             reqBody.append("projectImage",projectImage)
             const result=await addProjectApi(reqBody,headerConfig)
             if(result.status==200){
-                alert(`${result.data.title} added`)
+                // alert(`${result.data.title} added`)
+                setAddUpdate(result.data)
+                toast.info(`${result.data.title} added`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                // reset form data
+                setProjectInputs({...projectInputs,title:"", languages: "", overView: "", gitHub: "", website: "",projectImage:""})
+                
                 handleClose()
             }
             else{
-                alert(result.response.data)
+                // alert(result.response.data)
+                toast.info(result.response.data, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
             }
             console.log(result);
         }
@@ -87,16 +117,16 @@ function Myprojects() {
                             </label>
                         </Col>
                         <Col>
-                            <input name='title' onChange={(e) => setInputs(e)} type='text' 
+                            <input value={projectInputs.title} name='title' onChange={(e) => setInputs(e)} type='text' 
                             placeholder='Project Name' className='form-control p-2 mt-3' style={{ border: 'none' }} />
                             <hr />
-                            <input name='languages' onChange={(e) => setInputs(e)} type='text'
+                            <input value={projectInputs.languages} name='languages' onChange={(e) => setInputs(e)} type='text'
                              placeholder='Language Used' className='form-control p-2 mt-3' style={{ border: 'none' }} />
                             <hr />
-                            <input name='gitHub' onChange={(e) => setInputs(e)} type='text'
+                            <input value={projectInputs.gitHub} name='gitHub' onChange={(e) => setInputs(e)} type='text'
                              placeholder='Github Link' className='form-control p-2 mt-3' style={{ border: 'none' }} />
                             <hr />
-                            <input name='website' onChange={(e) => setInputs(e)} type='text'
+                            <input value={projectInputs.website} name='website' onChange={(e) => setInputs(e)} type='text'
                              placeholder='Website Link' className='form-control p-2 mt-3' style={{ border: 'none' }} />
                             <hr />
                         </Col>
@@ -104,7 +134,7 @@ function Myprojects() {
                     </Row>
                     <Row>
                         <Col>
-                            <textarea name='overView' onChange={(e) => setInputs(e)} style={{ border: 'none' }} type='text' placeholder='Project Overview' className='form-control p-2 mt-3 mb-5' />
+                            <textarea value={projectInputs.overView} name='overView' onChange={(e) => setInputs(e)} style={{ border: 'none' }} type='text' placeholder='Project Overview' className='form-control p-2 mt-3 mb-5' />
                             <hr />
                         </Col>
                     </Row>
@@ -118,20 +148,8 @@ function Myprojects() {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <div className='border mt-3 p-4 shadow'>
-                <Row>
-                    <Col lg={8}>
-                        <span>Project Title</span>
-                    </Col>
-                    <Col lg={4} className='text-end'>
-                        <Link className='text-end border-start border-end px-3'><i class="fa-solid fa-pen-to-square fa-2x"></i></Link>
-                        <Link className='text-end px-3'><i class="fa-brands fa-github fa-2x"></i></Link>
-                        <Link className='text-end px-3'><i class="fa-solid fa-trash text-dark fa-2x"></i></Link>
-                    </Col>
-                </Row>
-            </div>
-            <p className='text-primary mt-5 p-4'>No Projects Uploaded  !</p>
-
+            
+            <ToastContainer />
         </div>
     )
 }

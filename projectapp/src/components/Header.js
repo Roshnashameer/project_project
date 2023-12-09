@@ -7,7 +7,8 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function Header({ dashboard }) {
     const navigate=useNavigate()
-    const logOut=()=>{
+    const logOut=(e)=>{
+        e.preventDefault()
         localStorage.removeItem("currentUser")
         localStorage.removeItem("currentId")
         localStorage.removeItem("token")

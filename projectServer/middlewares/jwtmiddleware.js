@@ -1,6 +1,6 @@
 const jwt=require('jsonwebtoken')
 exports.jwtMiddleware=(req,res,next)=>{
-    console.log("inside middleware");
+    // console.log("inside middleware");
     // token access
     const token=req.headers['access_token'].split(" ")[1]
 
